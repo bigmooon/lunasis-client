@@ -16,7 +16,7 @@ import {
   useSendMessageMutation,
 } from '@web/features/chat/hooks';
 import { useChatStore } from '@web/features/chat/stores';
-import { convertChatMessagesToUIMessages } from '@web/features/chat/utils';
+import { resolveInitialMessages } from '@web/features/chat/utils';
 
 import styles from '../chat.module.scss';
 
@@ -107,63 +107,30 @@ export default function ChatRoomPage() {
     [isIncognito, t],
   );
 
-  // Initialize messages from API (logged-in) or pendingMessages (anonymous).
-  // Prioritize API data over pending messages to prevent race conditions:
-  // if API data arrives after the effect first runs with pending messages,
-  // we re-run and replace the pending content with the authoritative data.
+  // Decide the initial messages once auth has rehydrated (see resolveInitialMessages)
   useEffect(() => {
-    if (isInitialized) {
-      return;
-    }
+    if (isInitialized) return;
 
-    const welcomeMessage: Message = {
-      id: 'welcome-1',
-      role: 'assistant',
-      content: welcomeText,
-      timestamp: new Date(),
-    };
+    const result = resolveInitialMessages({
+      hydrated,
+      isAnonymous,
+      welcome: { id: 'welcome-1', role: 'assistant', content: welcomeText, timestamp: new Date() },
+      apiData: chatMessagesData,
+      pending: pendingMessages,
+    });
+    if (result.status === 'wait') return;
 
-    if (!isAnonymous && chatMessagesData) {
-      // Logged-in: API data is ready — use it as the source of truth
-      const apiMessages = convertChatMessagesToUIMessages(chatMessagesData);
-      setMessages([welcomeMessage, ...apiMessages]);
-      clearPendingMessages(); // Clear only after API data has arrived
-      setIsInitialized(true);
-    } else if (pendingMessages) {
-      // Fallback: show pending messages while API loads (or for anonymous users)
-      const pendingUserMessage: Message = {
-        id: 'user-initial',
-        role: 'user',
-        content: pendingMessages.question,
-        timestamp: pendingMessages.timestamp,
-      };
-      const pendingAiMessage: Message = {
-        id: 'ai-initial',
-        role: 'assistant',
-        content: pendingMessages.answer,
-        timestamp: pendingMessages.timestamp,
-      };
-      setMessages([welcomeMessage, pendingUserMessage, pendingAiMessage]);
-      // For anonymous users, clear immediately (no API data will arrive).
-      // For logged-in users, keep pending messages until API data arrives.
-      if (isAnonymous) {
-        clearPendingMessages();
-      }
-      setIsInitialized(true);
-    } else if (isAnonymous) {
-      // Anonymous with no pending messages — show welcome only
-      setMessages([welcomeMessage]);
-      setIsInitialized(true);
-    }
-    // If none of the conditions match (logged-in, no API data, no pending messages),
-    // do not initialize yet — wait for the next render when chatMessagesData arrives.
+    setMessages(result.messages);
+    if (result.clearPending) clearPendingMessages();
+    setIsInitialized(true);
   }, [
     isInitialized,
+    hydrated,
+    isAnonymous,
     welcomeText,
+    chatMessagesData,
     pendingMessages,
     clearPendingMessages,
-    isAnonymous,
-    chatMessagesData,
   ]);
 
   // cleanup object URLs (for memory leak prevention)
