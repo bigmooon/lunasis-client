@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -29,12 +30,14 @@ export interface Message {
   content: string;
   timestamp: Date;
   attachments?: Attachment[];
+  status?: 'failed';
 }
 
 interface MessageListProps {
   messages: Message[];
   isLoading?: boolean;
   locale: SupportedLocale;
+  onRetry?: (message: Message) => void;
 }
 
 const formatFileSize = (bytes: number): string => {
@@ -43,7 +46,8 @@ const formatFileSize = (bytes: number): string => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 };
 
-export function MessageList({ messages, isLoading = false, locale }: MessageListProps) {
+export function MessageList({ messages, isLoading = false, locale, onRetry }: MessageListProps) {
+  const t = useTranslations('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { isIncognito } = useChatStore();
@@ -131,6 +135,21 @@ export function MessageList({ messages, isLoading = false, locale }: MessageList
                   </ReactMarkdown>
                 </div>
               </div>
+
+              {message.status === 'failed' && (
+                <div className={styles.failed} role="alert">
+                  <span>{t('message.failed')}</span>
+                  {onRetry && (
+                    <button
+                      type="button"
+                      className={styles.retryButton}
+                      onClick={() => onRetry(message)}
+                    >
+                      {t('message.retry')}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

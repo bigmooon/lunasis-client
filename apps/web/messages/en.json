@@ -34,6 +34,7 @@
   },
   "chat": {
     "placeholder": "Ask to Luna",
+    "message": { "failed": "Couldn't send", "retry": "Resend" },
     "sidebar": {
       "loading": "Loading...",
       "retry": "Retry",

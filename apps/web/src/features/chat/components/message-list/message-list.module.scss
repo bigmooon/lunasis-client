@@ -294,3 +294,23 @@
     padding: $spacing-2 $spacing-4;
   }
 }
+
+.failed {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #c62828;
+}
+
+.retryButton {
+  padding: 4px 10px;
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}

@@ -34,6 +34,7 @@
   },
   "chat": {
     "placeholder": "루나에게 무엇이든 물어보세요!",
+    "message": { "failed": "전송하지 못했어요", "retry": "다시 보내기" },
     "sidebar": {
       "loading": "로딩 중...",
       "retry": "다시 시도",

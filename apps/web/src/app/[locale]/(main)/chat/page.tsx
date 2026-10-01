@@ -17,7 +17,7 @@ import {
   useCreateChatMutation,
 } from '@web/features/chat/hooks';
 import { useChatStore } from '@web/features/chat/stores';
-import { getAnonymousUserId } from '@web/features/chat/utils';
+import { getAnonymousUserId, markMessageFailed } from '@web/features/chat/utils';
 
 import styles from './chat.module.scss';
 
@@ -29,6 +29,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { setLayoutActions } = useChatLayout();
   const isMountedRef = useRef(true);
+  const lastSentIdRef = useRef<string | null>(null);
   const hydrated = useAuthStoreHydration();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const nickname = useAuthStore((s) => s.nickname);
@@ -50,8 +51,9 @@ export default function ChatPage() {
     },
     onError: (error) => {
       if (!isMountedRef.current) return;
-      const errorMessage = getErrorMessage(error);
-      toast.error(errorMessage);
+      toast.error(getErrorMessage(error));
+      const failedId = lastSentIdRef.current;
+      if (failedId) setMessages((prev) => markMessageFailed(prev, failedId));
       setIsLoading(false);
     },
   });
@@ -67,8 +69,9 @@ export default function ChatPage() {
     },
     onError: (error) => {
       if (!isMountedRef.current) return;
-      const errorMessage = getErrorMessage(error);
-      toast.error(errorMessage);
+      toast.error(getErrorMessage(error));
+      const failedId = lastSentIdRef.current;
+      if (failedId) setMessages((prev) => markMessageFailed(prev, failedId));
       setIsLoading(false);
     },
   });
@@ -138,6 +141,7 @@ export default function ChatPage() {
         timestamp: new Date(),
       };
 
+      lastSentIdRef.current = userMessage.id;
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
 
@@ -150,6 +154,14 @@ export default function ChatPage() {
     [isAnonymous, createAnonymousChatMutation, createChatMutation, t],
   );
 
+  const handleRetry = useCallback(
+    (failed: Message) => {
+      setMessages((prev) => prev.filter((message) => message.id !== failed.id));
+      void handleSend(failed.content, { webSearch: false, file: null });
+    },
+    [handleSend],
+  );
+
   // Register handleSend and isLoading with the layout
   useEffect(() => {
     setLayoutActions({ handleSend, isLoading });
@@ -160,7 +172,12 @@ export default function ChatPage() {
       {isFirstTime ? (
         <WelcomeScreen mode="firstTime" nickname={nickname} />
       ) : (
-        <MessageList messages={messages} isLoading={isLoading} locale={locale as SupportedLocale} />
+        <MessageList
+          messages={messages}
+          isLoading={isLoading}
+          locale={locale as SupportedLocale}
+          onRetry={handleRetry}
+        />
       )}
     </div>
   );
