@@ -156,10 +156,11 @@ export default function ChatPage() {
 
   const handleRetry = useCallback(
     (failed: Message) => {
+      if (isLoading) return;
       setMessages((prev) => prev.filter((message) => message.id !== failed.id));
       void handleSend(failed.content, { webSearch: false, file: null });
     },
-    [handleSend],
+    [handleSend, isLoading],
   );
 
   // Register handleSend and isLoading with the layout
@@ -176,7 +177,7 @@ export default function ChatPage() {
           messages={messages}
           isLoading={isLoading}
           locale={locale as SupportedLocale}
-          onRetry={handleRetry}
+          onRetry={isLoading ? undefined : handleRetry}
         />
       )}
     </div>
