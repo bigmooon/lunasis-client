@@ -2,6 +2,7 @@
 
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import CreateIcon from '@mui/icons-material/Create';
 import { MessageSquareIcon } from 'lucide-react';
 
@@ -27,6 +28,20 @@ export const Sidebar = () => {
   const isIncognito = useChatStore((state) => state.isIncognito);
 
   const { data, isLoading, isError, error, refetch } = useChatRoomsQuery(!isIncognito);
+
+  const asideRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+
+    asideRef.current?.querySelector<HTMLElement>('button:not([disabled])')?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') toggleSidebar();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isSidebarOpen, toggleSidebar]);
 
   const handleToggleSidebar = () => {
     toggleSidebar();
@@ -64,6 +79,7 @@ export const Sidebar = () => {
       inert={!isSidebarOpen}
     >
       <aside
+        ref={asideRef}
         className={clsx(styles.sidebar, { [styles.sidebarOpen]: isSidebarOpen })}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
