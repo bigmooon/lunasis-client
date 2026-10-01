@@ -10,6 +10,9 @@ test('한국어 메인은 한국어로 보이고 미구현 병원 카드는 없�
   await expect(page.getByRole('link', { name: /채팅하기/ })).toBeVisible();
   await expect(page.getByText('Talk Room')).toHaveCount(0);
   await expect(page.getByText('병원 찾기')).toHaveCount(0);
+  await expect(page.locator('a[href*="/hospital"]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'calendar' })).toHaveCount(0);
+  await expect(page.locator('nav[data-bottom-navigation] button')).toHaveCount(3);
 });
 
 test('영어 메인은 영어로 보인다', async ({ page }) => {

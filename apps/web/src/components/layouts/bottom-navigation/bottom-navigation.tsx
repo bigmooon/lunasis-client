@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { usePathname, useRouter, useSelectedLayoutSegments } from 'next/navigation';
 
 import { NAVIGATION_SEGMENTS, ROUTES } from '@repo/shared/constants';
-import CalendarIcon from '@web/assets/icons/calendar.svg';
 import ChatIcon from '@web/assets/icons/chat.svg';
 import ProductIcon from '@web/assets/icons/keyframes.svg';
 import ProfileIcon from '@web/assets/icons/profile.svg';
@@ -26,11 +25,7 @@ const NAVIGATION_CONFIG: NavItemConfig[] = [
     icon: ChatIcon,
     label: 'chatbot service',
   },
-  {
-    path: ROUTES.HOSPITAL,
-    icon: CalendarIcon,
-    label: 'calendar',
-  },
+  // ponytail: hospital tab hidden until /hospital ships
   {
     path: ROUTES.ROOT,
     icon: ProductIcon,
@@ -81,7 +76,7 @@ function BottomNavigation() {
   }));
 
   const handleNavigate = (path: string, label: string) => {
-    if (label === 'calendar' || label === 'profile') {
+    if (label === 'profile') {
       alert(t('comingSoon'));
       return;
     }
