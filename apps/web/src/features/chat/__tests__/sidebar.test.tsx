@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { Sidebar } from '../components/sidebar/sidebar';
 import { useChatStore } from '../stores/use-chat-store';
@@ -42,7 +42,7 @@ describe('Sidebar', () => {
 
     const buttons = screen.getAllByRole('button', { name: 'newChat' });
     expect(buttons).toHaveLength(1);
-    buttons[0].click();
+    fireEvent.click(buttons[0]);
     expect(mockPush).toHaveBeenCalledWith('/ko/chat');
   });
 });
