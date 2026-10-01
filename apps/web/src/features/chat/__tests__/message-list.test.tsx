@@ -28,6 +28,12 @@ describe('MessageList', () => {
     Element.prototype.scrollIntoView = jest.fn();
   });
 
+  it('메시지 목록은 log 영역이고 로딩 중에는 상태를 알린다', () => {
+    render(<MessageList messages={[]} locale="ko" isLoading />);
+    expect(screen.getByRole('log')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('message.loading');
+  });
+
   it('실패한 메시지에 실패 안내와 다시 보내기 버튼을 보여준다', () => {
     const onRetry = jest.fn();
     render(<MessageList messages={[failed]} locale="ko" onRetry={onRetry} />);

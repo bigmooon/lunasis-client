@@ -135,6 +135,7 @@ export const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             placeholder={t('placeholder')}
+            aria-label={t('inputLabel')}
             autoComplete="off"
             maxLength={500}
             rows={1}
@@ -180,6 +181,7 @@ export const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
             onClick={handleSend}
             disabled={disabled || !message.trim()}
             className={styles.toolbarButton}
+            aria-label={t('send')}
           >
             <SendIcon />
           </Button>

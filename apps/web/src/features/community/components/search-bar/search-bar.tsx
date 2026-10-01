@@ -7,10 +7,10 @@ export const SearchBar = () => {
   return (
     <div className={styles.searchBar}>
       <div className={styles.inputContainer}>
-        <Input variant="filled" className={styles.input} />
+        <Input variant="filled" className={styles.input} aria-label="Search posts" />
       </div>
       <div className={styles.buttonContainer}>
-        <Button colorScheme="gray" className={styles.button}>
+        <Button colorScheme="gray" className={styles.button} aria-label="Search">
           <svg
             className={styles.searchIcon}
             viewBox="0 0 24 24"

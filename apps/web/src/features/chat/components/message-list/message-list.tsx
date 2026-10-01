@@ -68,7 +68,7 @@ export function MessageList({ messages, isLoading = false, locale, onRetry }: Me
   }, [messages, isLoading]);
 
   return (
-    <div ref={containerRef} className={styles.messages}>
+    <div ref={containerRef} className={styles.messages} role="log" aria-live="polite">
       {messages.map((message) => (
         <div
           key={message.id}
@@ -172,8 +172,9 @@ export function MessageList({ messages, isLoading = false, locale, onRetry }: Me
                   LUNA
                 </span>
               </div>
-              <div className={clsx(styles.bubble, styles.loadingBubble)}>
-                <div className={styles.loadingDots}>
+              <div className={clsx(styles.bubble, styles.loadingBubble)} role="status">
+                <span className={styles.srOnly}>{t('message.loading')}</span>
+                <div className={styles.loadingDots} aria-hidden="true">
                   <span />
                   <span />
                   <span />

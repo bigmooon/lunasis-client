@@ -38,3 +38,11 @@ describe('ChatInput Enter 처리', () => {
     expect(onSend).not.toHaveBeenCalled();
   });
 });
+
+describe('ChatInput 접근성', () => {
+  it('입력창과 전송 버튼에 접근 가능한 이름이 있다', () => {
+    render(<ChatInput onSend={jest.fn()} />);
+    expect(screen.getByRole('textbox', { name: 'inputLabel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'send' })).toBeInTheDocument();
+  });
+});

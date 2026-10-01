@@ -55,9 +55,6 @@ export const metadata: Metadata = {
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  minimumScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
   themeColor: '#f6f6f6',
 };
@@ -84,7 +81,11 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={dmSans.variable} style={{ backgroundColor: '#f6f6f6' }} suppressHydrationWarning>
+      <body
+        className={dmSans.variable}
+        style={{ backgroundColor: '#f6f6f6' }}
+        suppressHydrationWarning
+      >
         <ViewportHeightSetter />
         <Providers>
           <NextIntlClientProvider messages={messages}>
