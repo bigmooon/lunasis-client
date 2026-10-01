@@ -92,8 +92,9 @@ export const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
     }
   }, [message]);
 
-  // shift + enter: new line, enter: send
+  // shift + enter: new line, enter: send (ignore Enter that confirms an IME composition)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
