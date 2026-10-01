@@ -1,36 +1,111 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LUNAsis
 
-## Getting Started
+묻기 어려운 여성 건강 고민을 로그인 없이 AI 캐릭터 "LUNA"에게 익명으로 물어볼 수 있는 모바일 우선 웹앱(PWA)입니다.
 
-First, run the development server:
+> **상태:** 2025-10 ~ 2026-03 창업 팀 프로젝트로 개발·배포했고, 현재 서비스 운영은 중단됐습니다. 운영 서버가 없어 라이브 데모는 동작하지 않으며, 핵심 흐름은 백엔드·AI를 mock으로 대체한 E2E 테스트로 재현할 수 있습니다([실행 방법](#실행-방법)).
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 프로젝트 개요
+
+| 항목        | 내용                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------- |
+| 형태        | 창업 팀 **LUN4sis** (5인: 기획·디자인 2, 백엔드 1, AI 1, 프론트엔드 1)                                              |
+| 기간        | 2025-10 ~ 2026-03 (이 저장소 커밋 기준)                                                                             |
+| 내 역할     | **프론트엔드 단독 담당** — 웹 클라이언트 전체, 웹·앱 공유 패키지 설계, API 명세 설계 참여, 기획과 함께 UI 구조 설계 |
+| 타깃 사용자 | 20~30대                                                                                                             |
+
+## 왜 만들었나
+
+생리·피임·임신 같은 주제는 질문 기록이 남는 것 자체가 부담입니다. 팀이 진행한 주변 인터뷰에서 이 요구가 나왔고, 그래서 두 가지 장치를 두었습니다.
+
+- **익명 챗** — 로그인하지 않아도 바로 질문할 수 있습니다.
+- **시크릿 모드** — 로그인한 사용자도 켜면 대화가 서버에 저장되지 않습니다.
+
+## 주요 기능
+
+- **AI 상담 LUNA** — 익명 / 시크릿 / 로그인 3가지 모드, 마크다운 답변
+- **개인화** — 답변 말투·호칭 설정, AI가 기억한 내용 확인·삭제
+- **커뮤니티** — 생리·피임·정신건강 등 주제별 게시판
+- **제품 랭킹** — 카테고리별 제품 랭킹과 상세 정보
+- **온보딩·로그인** — 닉네임/나이/관심사 온보딩, Google·Apple OAuth
+- **다국어** — 한국어 / English
+
+## 기술적으로 집중한 것
+
+### 1. 웹·앱이 함께 쓰는 API·에러 계층
+
+`packages/shared`에 API 클라이언트, 에러 타입, 인증 스토어를 두고 웹(Next.js)과 앱(Expo)이 같은 정책을 쓰도록 했습니다.
+
+- 토큰이 만료돼 여러 요청이 동시에 401을 받으면 갱신은 한 번만 하고, 나머지 요청은 큐에 모았다가 새 토큰으로 재시도합니다 (`packages/shared/src/api/base.api.ts`).
+- 에러를 `AppError`/`ErrorCode`로 정규화해 API → Hook → Component → Error Boundary 순서로 전파합니다 ([에러 처리 가이드](docs/error-handling-guide.md)).
+
+### 2. 첫 질문 직후 화면 깜빡임 제거
+
+첫 질문을 보내면 서버가 대화방을 만들고 `/chat/[id]`로 이동합니다. 이동 직후 서버 기록 조회가 늦으면 방금 한 질문이 사라졌다가 다시 나타나는 깜빡임이 있었습니다. 응답을 스토어의 대기 메시지로 넘겨 먼저 보여주고, 서버 기록이 오면 교체하도록 했습니다.
+
+### 3. 인증 복원 타이밍 버그 수정
+
+로그인 사용자가 대화방을 새로고침하거나 링크로 바로 들어오면, 인증 정보가 저장소에서 복원되기 전에 화면이 "익명" 상태로 초기화돼 서버에 있는 기록이 보이지 않았습니다. 초기 메시지 결정을 순수 함수(`resolveInitialMessages`)로 분리해 복원 전에는 기다리도록 고치고, 단위 테스트와 E2E로 고정했습니다.
+
+### 4. 실패해도 이어갈 수 있는 챗
+
+- AI 서버가 실패하면 백엔드의 내부 오류 메시지 대신 사용자용 한국어 안내를 보여줍니다.
+- 실패한 질문에는 "전송하지 못했어요" 표시와 "다시 보내기" 버튼이 남고, 다른 요청이 진행 중일 때는 재전송을 막습니다.
+- 한글 조합 중 Enter로 전송되지 않도록 IME 입력을 처리했습니다.
+
+### 5. 접근성
+
+화면 확대 허용, 아이콘 버튼·입력창의 접근 가능한 이름, 메시지 목록 `role="log"`, 로딩 `role="status"`, 색 대비 수정, 사이드바 Escape 닫기를 적용했습니다. 주요 4개 화면(`/ko`, `/ko/chat`, `/ko/community`, `/ko/login`)에서 axe(WCAG 2 A/AA) critical·serious 위반 0건을 E2E로 검사합니다.
+
+## 기술 스택
+
+| 기술                                          | 사용한 곳                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| Next.js 15 (App Router), React 19, TypeScript | 웹 앱, 로케일 라우팅, `loading`/`error`/`not-found` 경계, 보안 응답 헤더     |
+| TanStack Query v5                             | 채팅방·메시지 등 서버 상태 캐싱, 쿼리 키 팩토리, 재시도 가능한 오류만 재시도 |
+| Zustand v5                                    | 시크릿 모드·사이드바·대기 메시지 같은 UI 상태, 인증 상태 유지                |
+| next-intl                                     | 한국어/영어 문구 관리                                                        |
+| react-markdown + rehype-sanitize              | AI 답변 마크다운 표시와 XSS 방지                                             |
+| pnpm workspace + Turborepo                    | 웹·앱·공유 패키지 모노레포                                                   |
+| Jest + Testing Library, Playwright + axe-core | 단위 테스트, 백엔드·AI를 mock한 E2E, 접근성 검사                             |
+
+TanStack Query와 Zustand는 도입이 간단하고, 상태가 많은 챗봇·상품 검색 화면에서 서버 상태와 UI 상태를 나눠 관리하기 위해 선택했습니다.
+
+## 구조
+
+```
+lunasis-client/
+├── apps/
+│   ├── web/      Next.js 웹 앱 (PWA)
+│   │   └── e2e/  Playwright E2E (백엔드·AI mock)
+│   └── mobile/   Expo 앱 (초기 단계, 현재 진행 계획 없음)
+└── packages/
+    └── shared/   API 클라이언트 · 에러 타입 · 인증/커뮤니티 스토어
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 실행 방법
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+요구 사항: Node.js 20 이상, pnpm 9 이상 (`corepack enable`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm install
 
-## Learn More
+# 단위 테스트
+pnpm --filter web test
 
-To learn more about Next.js, take a look at the following resources:
+# E2E — 앱을 빌드해 띄운 뒤, 백엔드와 AI 응답을 mock으로 대체해
+# 익명 질문·새로고침 후 기록·실패 후 재전송·접근성을 확인합니다.
+pnpm --filter web exec playwright install chromium
+pnpm --filter web test:e2e
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+개발 서버(`pnpm dev:web`)는 띄울 수 있지만, 백엔드가 별도 저장소이고 운영이 중단돼 챗·커뮤니티 등 데이터 기능은 동작하지 않습니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 알려진 제한 사항
 
-## Deploy on Vercel
+- AI 답변은 스트리밍이 아닌 요청/응답 방식입니다. 다시 만든다면 SSE 스트리밍을 지원하고 싶습니다.
+- 빠른 MVP를 위해 챗 파일 첨부·웹 검색 기능은 비활성화했습니다.
+- 병원 찾기 기능은 구현하지 않아 메뉴에서 숨겼습니다.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 문서
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [에러 처리 가이드](docs/error-handling-guide.md)
