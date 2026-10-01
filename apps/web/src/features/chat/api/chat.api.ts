@@ -1,4 +1,4 @@
-import { ApiResponse, AppError, ErrorCode } from '@repo/shared/types';
+import { ApiResponse, AppError, mapStatusToErrorCode } from '@repo/shared/types';
 import { logger, transformError } from '@repo/shared/utils';
 import { api } from '@web/api/api';
 
@@ -13,6 +13,14 @@ import {
 } from '../types';
 import { getAnonymousUserId } from '../utils/anonymous-user';
 
+// Server messages may contain internal hosts, so keep them in details (logs) only.
+function toApiError(response: ApiResponse<unknown>): AppError {
+  const status = response.code ?? 500;
+  return new AppError(mapStatusToErrorCode(status), undefined, status, undefined, {
+    serverMessage: response.message,
+  });
+}
+
 // get chat room list
 export async function getChatRoomsAPI(): Promise<GetChatRoomsRes> {
   try {
@@ -21,7 +29,7 @@ export async function getChatRoomsAPI(): Promise<GetChatRoomsRes> {
     if (response.success && response.data) {
       return response.data;
     }
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to get chat rooms');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[getChatRoomsAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -38,7 +46,7 @@ export async function createChatRoomAPI(formData: {
     if (response.success && response.data) {
       return response.data;
     }
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to create chat room');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[createChatRoomAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -53,7 +61,7 @@ export async function getChatLogAPI(chatRoomId: string): Promise<GetChatLogRes> 
     if (response.success && response.data) {
       return response.data;
     }
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to get chat log');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[getChatLogAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -71,7 +79,7 @@ export async function sendMessageAPI(
     if (response.success && response.data) {
       return response.data;
     }
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to send message');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[sendMessageAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -88,7 +96,7 @@ export async function modifyChatRoomTitleAPI(
 
     if (response.success) return;
 
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to modify chat room title');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[modifyChatRoomTitleAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -107,7 +115,7 @@ export async function anonymousChatAPI(formData: { question: string }): Promise<
     if (response.success && response.data) {
       return response.data;
     }
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to perform anonymous chat');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[anonymousChatAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -121,7 +129,7 @@ export async function updateUserSettingAPI(formData: UpdateSettingReq): Promise<
 
     if (response.success) return;
 
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to update user setting');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[updateUserSettingAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -136,7 +144,7 @@ export async function getSavedMemoriesAPI(): Promise<GetSavedMemoriesRes> {
     if (response.success && response.data) {
       return response.data;
     }
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to get saved memories');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[getSavedMemoriesAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);
@@ -150,7 +158,7 @@ export async function deleteSavedMemoryAPI(savedMemoryId: string): Promise<void>
 
     if (response.success) return;
 
-    throw new AppError(ErrorCode.UNKNOWN_ERROR, '[API] Failed to delete saved memory');
+    throw toApiError(response);
   } catch (error: unknown) {
     logger.error('[deleteSavedMemoryAPI] error:', error as unknown as Record<string, unknown>);
     throw transformError(error);

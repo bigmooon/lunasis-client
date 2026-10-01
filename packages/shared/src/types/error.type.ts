@@ -295,7 +295,7 @@ export const SERVER_ERROR_MESSAGES = {
 /**
  * Map HTTP status code to ErrorCode
  */
-function mapStatusToErrorCode(status: number): ErrorCode {
+export function mapStatusToErrorCode(status: number): ErrorCode {
   switch (status) {
     case 400:
       return ErrorCode.BAD_REQUEST;
