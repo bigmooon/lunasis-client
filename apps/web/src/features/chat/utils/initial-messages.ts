@@ -13,6 +13,7 @@ interface InitialMessagesInput {
 
 export type InitialMessagesResult =
   | { status: 'wait' }
+  | { status: 'preview'; messages: Message[] }
   | { status: 'ready'; messages: Message[]; clearPending: boolean };
 
 const fromPending = (pending: PendingMessage): Message[] => [
@@ -24,6 +25,8 @@ const fromPending = (pending: PendingMessage): Message[] => [
  * Decides what a chat room shows on first render.
  * Waits for auth rehydration: before it, a logged-in user looks anonymous,
  * which used to lock the room into "welcome only" on refresh/direct entry.
+ * 'preview' shows pending messages for a logged-in user while server history is
+ * still loading; the caller must not lock initialization or clear pending then.
  */
 export function resolveInitialMessages({
   hydrated,
@@ -42,11 +45,10 @@ export function resolveInitialMessages({
     };
   }
   if (pending) {
-    return {
-      status: 'ready',
-      messages: [welcome, ...fromPending(pending)],
-      clearPending: isAnonymous,
-    };
+    const messages = [welcome, ...fromPending(pending)];
+    return isAnonymous
+      ? { status: 'ready', messages, clearPending: true }
+      : { status: 'preview', messages };
   }
   if (isAnonymous) return { status: 'ready', messages: [welcome], clearPending: false };
 

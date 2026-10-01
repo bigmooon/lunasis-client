@@ -121,6 +121,7 @@ export default function ChatRoomPage() {
     if (result.status === 'wait') return;
 
     setMessages(result.messages);
+    if (result.status === 'preview') return;
     if (result.clearPending) clearPendingMessages();
     setIsInitialized(true);
   }, [

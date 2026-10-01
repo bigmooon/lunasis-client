@@ -1,4 +1,5 @@
 import type { Message } from '../components/message-list';
+import type { GetChatLogRes } from '../types/api.type';
 import { resolveInitialMessages } from '../utils/initial-messages';
 
 const welcome: Message = {
@@ -7,7 +8,7 @@ const welcome: Message = {
   content: 'hi',
   timestamp: new Date(0),
 };
-const apiData = [{ chatId: 'c1', question: 'q1', answer: 'a1', image: null }];
+const apiData: GetChatLogRes = [{ chatId: 'c1', question: 'q1', answer: 'a1', image: null }];
 const pending = { question: 'pq', answer: 'pa', timestamp: new Date(0) };
 
 describe('resolveInitialMessages', () => {
@@ -37,7 +38,7 @@ describe('resolveInitialMessages', () => {
     expect(result.clearPending).toBe(true);
   });
 
-  it('로그인 사용자의 서버 기록이 아직 없으면 대기 메시지를 먼저 보여주고 비우지 않는다', () => {
+  it('로그인 사용자의 서버 기록이 아직 없으면 대기 메시지를 미리보기로 보여주고 초기화를 확정하지 않는다', () => {
     const result = resolveInitialMessages({
       hydrated: true,
       isAnonymous: false,
@@ -45,8 +46,8 @@ describe('resolveInitialMessages', () => {
       apiData: undefined,
       pending,
     });
-    expect(result).toMatchObject({ status: 'ready', clearPending: false });
-    if (result.status !== 'ready') return;
+    expect(result.status).toBe('preview');
+    if (result.status !== 'preview') return;
     expect(result.messages.map((m) => m.content)).toEqual(['hi', 'pq', 'pa']);
   });
 
