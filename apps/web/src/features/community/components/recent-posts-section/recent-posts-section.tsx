@@ -16,20 +16,42 @@ interface RecentPostsSectionProps {
   onCreatePost: (category: CommunityCategory) => void;
   onSeeMore: (category: CommunityCategory) => void;
   onPostClick: (postId: string) => void;
+  onRetry: () => void;
   className?: string;
 }
 
 export const RecentPostsSection = ({
   category,
   posts,
-  // isLoading,
-  // isError,
+  isLoading,
+  isError,
   onCreatePost,
   onSeeMore,
   onPostClick,
+  onRetry,
   className,
 }: RecentPostsSectionProps) => {
-  // TODO: 로딩, 에러 상태 처리
+  if (isError) {
+    return (
+      <section className={clsx(styles.section, className)}>
+        <div className={styles.emptyState} role="alert">
+          <p className={styles.emptyMessage}>Couldn&apos;t load posts.</p>
+          <Button
+            variant="outline"
+            colorScheme="pink"
+            onClick={onRetry}
+            className={clsx(styles.button, styles.write)}
+          >
+            Try again
+          </Button>
+        </div>
+      </section>
+    );
+  }
+
+  if (isLoading) {
+    return <section className={clsx(styles.section, className)} aria-busy="true" />;
+  }
 
   if (posts.length === 0) {
     return (

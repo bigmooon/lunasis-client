@@ -25,6 +25,7 @@ const CommunityPage = () => {
     data: postsData,
     isLoading: isLoadingPosts,
     isError: isErrorPosts,
+    refetch: refetchPosts,
   } = usePostsQuery({ category: selectedCategory });
 
   // Category change handler
@@ -97,6 +98,7 @@ const CommunityPage = () => {
         onCreatePost={handleCreatePost}
         onSeeMore={handleSeeMore}
         onPostClick={handlePostClick}
+        onRetry={() => refetchPosts()}
       />
     </div>
   );
