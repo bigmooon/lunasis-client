@@ -31,6 +31,8 @@
 
     .sub__button {
       @include flex;
+      text-decoration: none;
+      color: inherit;
       border: 1px solid black;
       background-color: $white;
       border-radius: $radius-5xl;
@@ -71,6 +73,8 @@
   box-shadow: $box-shadow-xl;
   overflow: hidden;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
