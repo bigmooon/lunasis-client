@@ -170,7 +170,7 @@ export default function ChatPage() {
 
   return (
     <div className={styles.messageListWrapper}>
-      {isFirstTime ? (
+      {isFirstTime && messages.length === 0 ? (
         <WelcomeScreen mode="firstTime" nickname={nickname} />
       ) : (
         <MessageList
