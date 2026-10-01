@@ -133,3 +133,6 @@ certificates
 /apps/mobile/build
 /apps/web/public/pwa
 /apps/mobile/public/pwa
+# Playwright
+apps/web/test-results/
+apps/web/playwright-report/

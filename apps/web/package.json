@@ -14,6 +14,7 @@
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
     "test:coverage": "jest --coverage --passWithNoTests",
     "fix:icons": "node scripts/fix-icon-transparency.js",
     "clean": "rm -rf .next .turbo node_modules"
@@ -48,7 +49,9 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.63.0",
     "@svgr/webpack": "^8.1.0",
     "@swc/core": "^1.13.5",
     "@swc/jest": "^0.2.39",
@@ -103,7 +106,8 @@
     },
     "testPathIgnorePatterns": [
       "<rootDir>/node_modules/",
-      "<rootDir>/.next/"
+      "<rootDir>/.next/",
+      "<rootDir>/e2e/"
     ],
     "transform": {
       "^.+\\.(t|j)sx?$": [
