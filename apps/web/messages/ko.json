@@ -40,7 +40,8 @@
       "blank": "채팅 내역이 없습니다.",
       "blankDescription": "새로운 대화를 시작해보세요!",
       "incognito": "시크릿 모드입니다",
-      "incognitoDescription": "이 모드에서는 채팅 기록이 저장되지 않습니다."
+      "incognitoDescription": "이 모드에서는 채팅 기록이 저장되지 않습니다.",
+      "newChat": "새 채팅 열기"
     },
     "welcome": {
       "normal": "다시 돌아오신 것을 환영해요!\n준비되면 무엇이든 말해주세요.",

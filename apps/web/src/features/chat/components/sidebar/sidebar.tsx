@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import CreateIcon from '@mui/icons-material/Create';
-import { MenuIcon, MessageSquareIcon } from 'lucide-react';
+import { MessageSquareIcon } from 'lucide-react';
 
 import { getErrorMessage } from '@repo/shared/utils';
 import { Button } from '@web/components/ui/button';
@@ -50,18 +50,18 @@ export const Sidebar = () => {
     handleToggleSidebar();
   };
 
-  if (!isSidebarOpen) return null;
-
   const chatRooms: ChatRoom[] = data ?? [];
 
   return (
     <div
       className={clsx(styles.overlay, { [styles.overlayVisible]: isSidebarOpen })}
-      onClick={handleToggleSidebar}
-      onKeyDown={handleOverlayKeyDown}
+      onClick={isSidebarOpen ? handleToggleSidebar : undefined}
+      onKeyDown={isSidebarOpen ? handleOverlayKeyDown : undefined}
       role="button"
-      tabIndex={0}
+      tabIndex={isSidebarOpen ? 0 : -1}
       aria-label="Close sidebar overlay"
+      aria-hidden={!isSidebarOpen}
+      inert={!isSidebarOpen}
     >
       <aside
         className={clsx(styles.sidebar, { [styles.sidebarOpen]: isSidebarOpen })}
@@ -70,15 +70,6 @@ export const Sidebar = () => {
         aria-modal="true"
       >
         <header className={styles.header}>
-          <Button
-            variant="ghost"
-            colorScheme="white"
-            onClick={handleToggleSidebar}
-            aria-label="Close sidebar"
-            className={styles.toggleButton}
-          >
-            <MenuIcon />
-          </Button>
           <Button
             variant="ghost"
             colorScheme="orange"
@@ -93,6 +84,15 @@ export const Sidebar = () => {
         </header>
 
         <div className={styles.content}>
+          <Button
+            variant="outline"
+            colorScheme="gray"
+            className={styles.createChat}
+            onClick={handleCreateChat}
+          >
+            {t('newChat')}
+          </Button>
+
           {isLoading && (
             <div className={styles.loading}>
               <p>{t('loading')}</p>
@@ -109,33 +109,32 @@ export const Sidebar = () => {
           )}
 
           {/* Chat list - only show when not in incognito mode */}
-          {!isLoading && !isError && !isIncognito && (
-            <>
-              {chatRooms.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <p>{t('blank')}</p>
-                  <span>{t('blankDescription')}</span>
-                </div>
-              ) : (
-                <ul className={styles.chatList}>
-                  {chatRooms.map((room) => (
-                    <li key={room.chatRoomId}>
-                      <button
-                        className={clsx(styles.chatItem, {
-                          [styles.chatItemActive]: currentChatId === room.chatRoomId,
-                        })}
-                        onClick={() => handleClickChatRoom(room.chatRoomId)}
-                        type="button"
-                      >
-                        <MessageSquareIcon className={styles.chatItemIcon} />
-                        <span className={styles.chatItemTitle}>{room.title}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </>
-          )}
+          {!isLoading &&
+            !isError &&
+            !isIncognito &&
+            (chatRooms.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>{t('blank')}</p>
+                <span>{t('blankDescription')}</span>
+              </div>
+            ) : (
+              <ul className={styles.chatList}>
+                {chatRooms.map((room) => (
+                  <li key={room.chatRoomId}>
+                    <button
+                      className={clsx(styles.chatItem, {
+                        [styles.chatItemActive]: currentChatId === room.chatRoomId,
+                      })}
+                      onClick={() => handleClickChatRoom(room.chatRoomId)}
+                      type="button"
+                    >
+                      <MessageSquareIcon className={styles.chatItemIcon} />
+                      <span className={styles.chatItemTitle}>{room.title}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ))}
 
           {/* Incognito mode message */}
           {!isLoading && !isError && isIncognito && (

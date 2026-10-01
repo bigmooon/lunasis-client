@@ -40,7 +40,8 @@
       "blank": "No chat history",
       "blankDescription": "Start a new conversation!",
       "incognito": "Incognito Mode",
-      "incognitoDescription": "Your chat history won't be saved in this mode."
+      "incognitoDescription": "Your chat history won't be saved in this mode.",
+      "newChat": "New chat"
     },
     "welcome": {
       "normal": "Welcome back!\nTell me anything when you're ready.",
